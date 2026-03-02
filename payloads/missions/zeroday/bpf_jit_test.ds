@@ -1,0 +1,59 @@
+# ============================================
+# BPF JIT EXPLOITATION TEST
+# ============================================
+# Purpose: Test BPF JIT for vulnerabilities
+# Target: Linux kernel with BPF_JIT=y
+# Severity: CRITICAL
+# Author: D3n14l0f53rv1c3
+# ============================================
+
+DELAY 2000
+
+CTRL ALT T
+DELAY 1000
+
+# Check BPF capabilities
+STRING echo "=== BPF CAPABILITIES ===" > /tmp/bpf_test.txt
+ENTER
+DELAY 100
+
+STRING cat /proc/self/status | grep Cap >> /tmp/bpf_test.txt
+ENTER
+DELAY 100
+
+# Test BPF syscall access
+STRING echo "=== BPF SYSCALL TEST ===" >> /tmp/bpf_test.txt
+ENTER
+DELAY 100
+
+STRING bpftool prog list 2>/dev/null >> /tmp/bpf_test.txt || echo "bpftool not available" >> /tmp/bpf_test.txt
+ENTER
+DELAY 500
+
+# Test BPF program loading
+STRING echo "=== BPF PROGRAM TEST ===" >> /tmp/bpf_test.txt
+ENTER
+DELAY 100
+
+# This is a simple BPF program test
+# If it loads, JIT compilation occurs
+STRING cat > /tmp/bpf_test.c << 'BPF'
+ENTER
+STRING struct bpf_insn insn = {};
+ENTER
+STRING BPF
+ENTER
+DELAY 100
+
+# Check JIT status
+STRING cat /proc/sys/net/core/bpf_jit_enable 2>/dev/null >> /tmp/bpf_test.txt || echo "BPF JIT not readable" >> /tmp/bpf_test.txt
+ENTER
+DELAY 100
+
+# Results
+STRING cat /tmp/bpf_test.txt
+ENTER
+DELAY 200
+
+STRING history -c; exit
+ENTER

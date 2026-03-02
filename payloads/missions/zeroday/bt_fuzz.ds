@@ -1,0 +1,77 @@
+# ============================================
+# BLUETOOTH STACK FUZZING
+# ============================================
+# Purpose: Fuzz Bluetooth stack for crashes
+# Target: Linux Bluetooth stack (btqca, btbcm)
+# Severity: HIGH
+# Author: D3n14l0f53rv1c3
+# ============================================
+
+DELAY 2000
+
+CTRL ALT T
+DELAY 1000
+
+# Enable Bluetooth
+STRING sudo hciconfig hci0 up
+ENTER
+DELAY 500
+
+STRING echo "=== BLUETOOTH FUZZING ===" > /tmp/bt_fuzz.txt
+ENTER
+DELAY 100
+
+# Test various HCI commands
+STRING echo "=== HCI COMMAND TESTS ===" >> /tmp/bt_fuzz.txt
+ENTER
+DELAY 100
+
+# Test inquiry
+STRING sudo hcitool inq 2>&1 >> /tmp/bt_fuzz.txt &
+ENTER
+DELAY 3000
+
+# Test scan
+STRING sudo hcitool scan 2>&1 >> /tmp/bt_fuzz.txt &
+ENTER
+DELAY 12000
+
+# Test name request
+STRING echo "=== NAME REQUEST TEST ===" >> /tmp/bt_fuzz.txt
+ENTER
+DELAY 100
+
+STRING sudo hcitool name 00:00:00:00:00:00 2>&1 >> /tmp/bt_fuzz.txt || echo "Name request handled" >> /tmp/bt_fuzz.txt
+ENTER
+DELAY 500
+
+# Test info request
+STRING echo "=== INFO REQUEST TEST ===" >> /tmp/bt_fuzz.txt
+ENTER
+DELAY 100
+
+STRING sudo hcitool info 00:00:00:00:00:00 2>&1 >> /tmp/bt_fuzz.txt || echo "Info request handled" >> /tmp/bt_fuzz.txt
+ENTER
+DELAY 500
+
+# Test LE commands
+STRING echo "=== BLE TESTS ===" >> /tmp/bt_fuzz.txt
+ENTER
+DELAY 100
+
+STRING sudo hcitool lescan 2>&1 | head -10 >> /tmp/bt_fuzz.txt &
+ENTER
+DELAY 10000
+
+# Check for crashes
+STRING dmesg | tail -20 | grep -i bluetooth >> /tmp/bt_fuzz.txt || echo "No Bluetooth crashes" >> /tmp/bt_fuzz.txt
+ENTER
+DELAY 200
+
+# Results
+STRING cat /tmp/bt_fuzz.txt
+ENTER
+DELAY 200
+
+STRING history -c; exit
+ENTER

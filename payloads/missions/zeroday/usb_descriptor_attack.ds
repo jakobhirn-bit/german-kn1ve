@@ -1,0 +1,24 @@
+# ============================================
+# USB DESCRIPTOR ATTACK
+# ============================================
+# Purpose: Test USB descriptor parsing
+# Target: All USB hosts
+# Severity: CRITICAL
+# Device: TDongle S3
+# Author: D3n14l0f53rv1c3
+# ============================================
+# This payload is for TDongle S3 only
+# It tests for USB descriptor vulnerabilities
+# ============================================
+
+# Payload configuration for TDongle S3 web UI
+# Upload via http://4.3.2.1:8080
+
+# Test 1: Long descriptor
+# Test 2: Malformed descriptor
+# Test 3: NULL descriptor
+# Test 4: Overflow descriptor
+
+# These tests should be performed via web UI
+# See knowledge/zeroday/usb_test_config.json
+

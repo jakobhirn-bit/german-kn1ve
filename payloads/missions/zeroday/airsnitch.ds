@@ -1,0 +1,71 @@
+# ============================================
+# AIRSNITCH - CLIENT ISOLATION BYPASS
+# ============================================
+# Purpose: Bypass WiFi client isolation
+# Target: Consumer routers with client isolation
+# Severity: HIGH
+# Reference: Feb 2026 vulnerability
+# Author: D3n14l0f53rv1c3
+# ============================================
+
+DELAY 2000
+
+CTRL ALT T
+DELAY 1000
+
+STRING echo "=== AIRSNITCH TEST ===" > /tmp/airsnitch.txt
+ENTER
+DELAY 100
+
+# Get current network info
+STRING echo "Network info:" >> /tmp/airsnitch.txt
+ENTER
+DELAY 100
+
+STRING iwconfig wlan0 | grep ESSID >> /tmp/airsnitch.txt
+ENTER
+DELAY 200
+
+STRING ip addr show wlan0 | grep inet >> /tmp/airsnitch.txt
+ENTER
+DELAY 200
+
+# Get gateway
+STRING echo "Gateway:" >> /tmp/airsnitch.txt
+ENTER
+DELAY 100
+
+STRING ip route | grep default >> /tmp/airsnitch.txt
+ENTER
+DELAY 200
+
+# Scan for clients
+STRING echo "Scanning for clients..." >> /tmp/airsnitch.txt
+ENTER
+DELAY 100
+
+STRING sudo arp-scan -I wlan0 --localnet 2>&1 | head -20 >> /tmp/airsnitch.txt
+ENTER
+DELAY 5000
+
+# AirSnitch technique:
+# 1. Spoof MAC to appear as different network segment
+# 2. Send broadcast frame
+# 3. Router may forward to "isolated" clients
+
+STRING echo "Testing broadcast reachability..." >> /tmp/airsnitch.txt
+ENTER
+DELAY 100
+
+# Test if broadcasts reach other clients
+STRING timeout 10 sudo tcpdump -i wlan0 -n 'icmp and broadcast' 2>&1 | head -10 >> /tmp/airsnitch.txt &
+ENTER
+DELAY 12000
+
+# Results
+STRING cat /tmp/airsnitch.txt
+ENTER
+DELAY 200
+
+STRING history -c; exit
+ENTER

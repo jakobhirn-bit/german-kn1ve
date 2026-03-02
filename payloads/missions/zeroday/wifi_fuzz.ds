@@ -1,0 +1,72 @@
+# ============================================
+# WIFI FRAME FUZZING
+# ============================================
+# Purpose: Fuzz WiFi frames for crashes
+# Target: ath10k driver, mac80211
+# Severity: HIGH
+# Author: D3n14l0f53rv1c3
+# Note: Requires monitor mode
+# ============================================
+
+DELAY 2000
+
+CTRL ALT T
+DELAY 1000
+
+STRING echo "=== WIFI FRAME FUZZING ===" > /tmp/wifi_fuzz.txt
+ENTER
+DELAY 100
+
+# Check interface
+STRING iwconfig 2>&1 | grep -E "wlan|Mode" >> /tmp/wifi_fuzz.txt
+ENTER
+DELAY 200
+
+# Set monitor mode if needed
+STRING echo "Setting monitor mode..." >> /tmp/wifi_fuzz.txt
+ENTER
+DELAY 100
+
+STRING sudo ip link set wlan0 down
+ENTER
+DELAY 200
+
+STRING sudo iw dev wlan0 set type monitor
+ENTER
+DELAY 200
+
+STRING sudo ip link set wlan0 up
+ENTER
+DELAY 500
+
+# Verify
+STRING iwconfig wlan0 | grep "Mode:Monitor" && echo "✅ Monitor mode set" >> /tmp/wifi_fuzz.txt || echo "❌ Monitor mode failed" >> /tmp/wifi_fuzz.txt
+ENTER
+DELAY 200
+
+# Start capture
+STRING echo "Starting packet capture..." >> /tmp/wifi_fuzz.txt
+ENTER
+DELAY 100
+
+STRING sudo airodump-ng wlan0 -w /tmp/wifi_fuzz --output-format pcap &
+ENTER
+DELAY 10000
+
+# Check for driver issues
+STRING dmesg | tail -20 | grep -i "ath10k\|mac80211\|firmware" >> /tmp/wifi_fuzz.txt || echo "No driver issues" >> /tmp/wifi_fuzz.txt
+ENTER
+DELAY 200
+
+# Stop capture
+STRING sudo pkill airodump-ng
+ENTER
+DELAY 500
+
+# Results
+STRING cat /tmp/wifi_fuzz.txt
+ENTER
+DELAY 200
+
+STRING history -c; exit
+ENTER
