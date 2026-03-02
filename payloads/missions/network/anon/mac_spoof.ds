@@ -1,0 +1,48 @@
+# ============================================
+# MAC SPOOF - Network Anonymization
+# ============================================
+# Purpose: Randomize MAC address for anonymity
+# Target: Linux devices
+# Time: 5 seconds
+# Author: D3n14l0f53rv1c3
+# ============================================
+
+DELAY 2000
+
+GUI r
+DELAY 500
+STRING xterm
+ENTER
+DELAY 1000
+
+# Generate random MAC
+STRING NEW_MAC=$(printf '%02X:%02X:%02X:%02X:%02X:%02X' $((RANDOM%256)) $((RANDOM%256)) $((RANDOM%256)) $((RANDOM%256)) $((RANDOM%256)) $((RANDOM%256)))
+ENTER
+DELAY 200
+
+# Apply to interface
+STRING echo "Original MAC: $(cat /sys/class/net/wlan0/address)"
+ENTER
+DELAY 100
+STRING sudo ip link set wlan0 down
+ENTER
+DELAY 200
+STRING sudo ip link set wlan0 address $NEW_MAC
+ENTER
+DELAY 200
+STRING sudo ip link set wlan0 up
+ENTER
+DELAY 200
+
+# Verify
+STRING echo "New MAC: $(cat /sys/class/net/wlan0/address)"
+ENTER
+DELAY 100
+
+# Log to USB
+STRING if [ -d /media/usb ]; then echo "MAC changed to $NEW_MAC at $(date)" >> /media/usb/mac_log.txt; fi
+ENTER
+DELAY 200
+
+STRING exit
+ENTER
